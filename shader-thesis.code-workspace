@@ -1,0 +1,47 @@
+{
+	"folders": [
+		{
+			"path": ".",
+		},
+	],
+	"settings": {
+		"editor.tabSize": 4,
+		"editor.insertSpaces": false,
+		"eslint.format.enable": true,
+		"eslint.workingDirectories": ["."],
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit",
+			"source.fixAll.stylelint": "explicit",
+		},
+
+		"css.validate": false,
+		"scss.validate": false,
+		"less.validate": false,
+		"html.validate.styles": false,
+
+		"stylelint.configBasedir": ".",
+		"stylelint.validate": ["css", "postcss", "sass", "scss"],
+
+		"typescript.tsdk": "./node_modules/typescript/lib",
+		"files.exclude": {
+			"**/.next": true,
+			"**/.yarn": true,
+		},
+		
+		"typescript.format.enable": false,
+		"typescript.disableAutomaticTypeAcquisition": true,
+		"javascript.validate.enable": false,
+		"workbench.editor.customLabels.patterns": {
+			"**/index.{js,jsx,ts,tsx}": "${dirname} (${filename}.${extname})",
+			"**/index.module.{css,scss}": "${dirname} (${filename}.${extname})",
+			"**/index.{client,server}.{js,jsx,ts,tsx}": "${dirname} (${filename}.${extname})",
+		},
+	},
+	"extensions": {
+		"recommendations": [
+			"dsznajder.es7-react-js-snippets",
+			"stylelint.vscode-stylelint",
+			"dbaeumer.vscode-eslint",
+		],
+	},
+}
