@@ -1,27 +1,14 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
-
-import { FlatCompat } from '@eslint/eslintrc';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-	...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
-  globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-  ]),
+export default defineConfig([
+	...nextVitals,
+	...nextTs,
+	eslintConfigPrettier,
+	globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 	{
 		plugins: {
 			'simple-import-sort': simpleImportSort,
@@ -43,7 +30,6 @@ const eslintConfig = [
 				},
 			],
 			'@typescript-eslint/explicit-module-boundary-types': 'off',
-
 			quotes: [
 				'error',
 				'single',
@@ -52,14 +38,11 @@ const eslintConfig = [
 					allowTemplateLiterals: true,
 				},
 			],
-
 			'simple-import-sort/imports': 'warn',
 			'simple-import-sort/exports': 'warn',
 		},
 	},
 	{
-		ignores: ['.next/', 'src/app/(payload)', 'src/app/(payload)/admin/importMap.js'],
+		ignores: ['src/app/(payload)', 'src/app/(payload)/admin/importMap.js'],
 	},
-];
-
-export default eslintConfig;
+]);

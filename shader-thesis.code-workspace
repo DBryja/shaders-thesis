@@ -27,7 +27,7 @@
 			"**/.next": true,
 			"**/.yarn": true,
 		},
-		
+
 		"typescript.format.enable": false,
 		"typescript.disableAutomaticTypeAcquisition": true,
 		"javascript.validate.enable": false,
@@ -36,12 +36,9 @@
 			"**/index.module.{css,scss}": "${dirname} (${filename}.${extname})",
 			"**/index.{client,server}.{js,jsx,ts,tsx}": "${dirname} (${filename}.${extname})",
 		},
+		"glsllint.linkShader": false,
 	},
 	"extensions": {
-		"recommendations": [
-			"dsznajder.es7-react-js-snippets",
-			"stylelint.vscode-stylelint",
-			"dbaeumer.vscode-eslint",
-		],
+		"recommendations": ["dsznajder.es7-react-js-snippets", "stylelint.vscode-stylelint", "dbaeumer.vscode-eslint"],
 	},
 }
