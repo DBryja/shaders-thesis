@@ -1,6 +1,7 @@
 'use client';
 
 import { useFrame } from '@react-three/fiber';
+import { useControls } from 'leva';
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { Timer } from 'three';
@@ -18,9 +19,18 @@ function ShaderMesh() {
 		uTime: { value: 0 },
 	});
 
+	const { timeMultiplier } = useControls({
+		timeMultiplier: {
+			value: 1,
+			min: 0,
+			max: 5,
+			step: 0.1,
+		},
+	});
+
 	useFrame(({}) => {
 		timerRef.current.update();
-		uniformsRef.current.uTime.value = timerRef.current.getElapsed();
+		uniformsRef.current.uTime.value = timerRef.current.getElapsed() * timeMultiplier;
 	});
 
 	return (

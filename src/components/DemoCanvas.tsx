@@ -1,5 +1,6 @@
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
+import { Leva } from 'leva';
 import { ReactNode, useLayoutEffect, useRef, useState } from 'react';
 
 interface DemoCanvasProps {
@@ -46,7 +47,26 @@ export function DemoCanvas({ children, background = '#0a0a0f', orbit = true, cam
 		camera?.fov === 'auto' ? fitFov(distance, aspect) : typeof camera?.fov === 'number' ? camera.fov : 50;
 
 	return (
-		<div ref={containerRef} className="h-[80svh] w-[80svh] aspect-square mx-auto border-2">
+		<div ref={containerRef} className="relative h-full w-full">
+			<div data-leva-root>
+				<Leva
+					collapsed
+					theme={{
+						colors: {
+							accent1: '#007bff',
+							accent2: '#3399ff',
+							accent3: '#66b3ff',
+							elevation1: '#1a1a1a',
+							elevation2: '#2a2a2a',
+							elevation3: '#3a3a3a',
+							highlight1: '#ffffff',
+							highlight2: '#f0f0f0',
+							highlight3: '#e0e0e0',
+						},
+					}}
+				/>
+			</div>
+
 			<Canvas
 				camera={{
 					position,

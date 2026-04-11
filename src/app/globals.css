@@ -24,3 +24,18 @@ body {
 	color: var(--foreground);
 	font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Leva customization */
+div[data-leva-root] {
+	right: 1rem !important;
+	left: auto !important;
+	top: 1rem !important;
+}
+
+body:has(#ui-toggle:checked) {
+	aside,
+	#header,
+	div[data-leva-root] {
+		display: none !important;
+	}
+}
