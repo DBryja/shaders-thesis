@@ -1,0 +1,19 @@
+.workList {
+	display: grid;
+	grid-template-columns: 1fr 1fr auto;
+	width: 100%;
+}
+
+.workItem {
+	grid-column: 1/-1;
+	display: grid;
+	grid-template-columns: subgrid;
+	padding: 1rem;
+	border-top: 1px solid white;
+	cursor: pointer;
+	transition: background 0.1s ease;
+
+	&:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+}
