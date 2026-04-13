@@ -5,7 +5,6 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { type StaticImageData } from 'next/image';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import * as THREE from 'three';
-import { Timer } from 'three';
 
 import fragmentShader from '../shaders/hoverImage.frag';
 import vertexShader from '../shaders/hoverImage.vert';
@@ -19,6 +18,7 @@ interface DistortedImageProps {
 type MouseForce = {
 	direction: { x: number; y: number };
 	strength: number;
+	updatedAt: number;
 };
 
 type Center = {
@@ -32,7 +32,6 @@ export interface DistortionHandle {
 }
 
 interface ShaderUniforms {
-	uTime: { value: number };
 	uDirection: { value: THREE.Vector2 };
 	uStrength: { value: number };
 	uTexture: { value: THREE.Texture | null };
@@ -40,7 +39,6 @@ interface ShaderUniforms {
 
 function ensureShaderUniforms(material: THREE.ShaderMaterial, fallbackTexture: THREE.Texture | null): ShaderUniforms {
 	const uniforms = material.uniforms as Partial<ShaderUniforms>;
-	if (!uniforms.uTime) uniforms.uTime = { value: 0 };
 	if (!uniforms.uDirection) uniforms.uDirection = { value: new THREE.Vector2(0, 0) };
 	if (!uniforms.uStrength) uniforms.uStrength = { value: 0 };
 	if (!uniforms.uTexture) uniforms.uTexture = { value: fallbackTexture };
@@ -63,9 +61,9 @@ function DistortedPlane({
 	const textureUrls = images.map(image => (typeof image === 'string' ? image : image.src));
 	const textures = useTexture(textureUrls) as THREE.Texture[];
 
-	const timerRef = useRef(new Timer());
 	const materialRef = useRef<THREE.ShaderMaterial | null>(null);
 	const cardRef = useRef<THREE.Group | null>(null);
+	const targetDirRef = useRef(new THREE.Vector2(0, 0));
 	const currentTextureIndexRef = useRef(0);
 
 	useEffect(() => {
@@ -113,17 +111,15 @@ function DistortedPlane({
 		card.position.lerp(new THREE.Vector3(targetX, targetY, 0), 0.25);
 		card.scale.lerp(new THREE.Vector3(targetWidthWorld, targetHeightWorld, 1), 0.25);
 
-		timerRef.current.update();
-		uniforms.uTime.value = timerRef.current.getElapsed();
-
 		// Odczytuje kierunek i siłę z refa.
 		const force = forceRef.current;
-		const targetDir = force ? new THREE.Vector2(force.direction.x, -force.direction.y) : new THREE.Vector2(0, 0);
-		const targetStrength = force ? force.strength : 0;
+		const idleMs = performance.now() - force.updatedAt;
+		const targetStrength = idleMs > 80 ? 0 : force.strength;
+		targetDirRef.current.set(force.direction.x, -force.direction.y);
 
 		// Aktualizuje kierunek z interpolacją liniową.
 		const currentDir = uniforms.uDirection.value;
-		currentDir.lerp(targetDir, 0.2);
+		currentDir.lerp(targetDirRef.current, 0.2);
 
 		// Aktualizuje siłę z tłumieniem w czasie.
 		const currentStrength = uniforms.uStrength.value;
@@ -152,6 +148,7 @@ export const DistortedImage = forwardRef<DistortionHandle, DistortedImageProps>(
 		const forceRef = useRef<MouseForce>({
 			direction: { x: 0, y: 0 },
 			strength: 0,
+			updatedAt: 0,
 		});
 		const centerRef = useRef<Center>({ x: 0.5, y: 0.5 });
 
@@ -159,7 +156,11 @@ export const DistortedImage = forwardRef<DistortionHandle, DistortedImageProps>(
 			ref,
 			() => ({
 				setForce(direction, strength) {
-					forceRef.current = { direction, strength };
+					forceRef.current = {
+						direction,
+						strength,
+						updatedAt: performance.now(),
+					};
 				},
 				setCenter(center) {
 					centerRef.current = center;

@@ -58,56 +58,21 @@ export default function Page() {
 	const [activeIndex, setActiveIndex] = useState<number | null>(null);
 	const [isFrameVisible, setIsFrameVisible] = useState(false);
 	const prevPosRef = useRef<{ x: number; y: number; t: number } | null>(null);
-	const decayRafRef = useRef<number | null>(null);
 	const hideTimeoutRef = useRef<number | null>(null);
-	const lastTickRef = useRef(0);
-	const currentForceRef = useRef<{ direction: { x: number; y: number }; strength: number }>({
-		direction: { x: 0, y: 0 },
-		strength: 0,
-	});
 	const images = works.map(work => getOptimizedImage(work.image.src));
 
 	useEffect(() => {
-		const DECAY_PER_SECOND = 4.2;
-		lastTickRef.current = performance.now();
-
-		const tick = (now: number) => {
-			const dt = Math.max(0, (now - lastTickRef.current) / 1000);
-			lastTickRef.current = now;
-
-			const current = currentForceRef.current;
-			if (current.strength > 0.0001) {
-				const nextStrength = Math.max(0, current.strength - DECAY_PER_SECOND * dt);
-				currentForceRef.current = {
-					direction: current.direction,
-					strength: nextStrength,
-				};
-				distortionRef.current?.setForce(current.direction, nextStrength);
-			}
-
-			decayRafRef.current = window.requestAnimationFrame(tick);
-		};
-
-		decayRafRef.current = window.requestAnimationFrame(tick);
 		return () => {
-			if (decayRafRef.current) {
-				window.cancelAnimationFrame(decayRafRef.current);
-			}
 			if (hideTimeoutRef.current) {
 				window.clearTimeout(hideTimeoutRef.current);
 			}
 		};
 	}, []);
 
-	const applyForce = (direction: { x: number; y: number }, strength: number) => {
-		currentForceRef.current = { direction, strength };
-		distortionRef.current?.setForce(direction, strength);
-	};
-
 	const handleMouseMove = (event: MouseEvent<HTMLElement>) => {
 		if (!isFrameVisible || activeIndex == null) return;
 
-		const x = event.clientX;
+		const x = event.clientX + 300;
 		const y = event.clientY;
 
 		const width = window.innerWidth || 1;
@@ -130,7 +95,7 @@ export default function Page() {
 				const speed = dist / dt; // px / ms
 				const strength = Math.min(speed * 0.8, 1);
 				// Aktualizuje impuls od ruchu kursora.
-				applyForce({ x: dirX, y: dirY }, strength);
+				distortionRef.current?.setForce({ x: dirX, y: dirY }, strength);
 			}
 		}
 
