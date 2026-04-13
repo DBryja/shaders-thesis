@@ -1,4 +1,3 @@
-// INSPO: https://www.awwwards.com/inspiration/shader-image-distortion-gabriel-veres
 'use client';
 
 import { getImageProps, type StaticImageData } from 'next/image';
@@ -53,13 +52,15 @@ function getOptimizedImage(url: string): string {
 }
 
 export default function Page() {
+	const HIDE_FRAME_DELAY_MS = 220;
 	const repeatedWorks = [...works, ...works, ...works];
 	const distortionRef = useRef<DistortionHandle | null>(null);
-	const [activeIndex, setActiveIndex] = useState<number | null>(0);
-	const [, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+	const [activeIndex, setActiveIndex] = useState<number | null>(null);
+	const [isFrameVisible, setIsFrameVisible] = useState(false);
 	const prevPosRef = useRef<{ x: number; y: number; t: number } | null>(null);
-	const idleResetTimeoutRef = useRef<number | null>(null);
-	const easeOutRafRef = useRef<number | null>(null);
+	const decayRafRef = useRef<number | null>(null);
+	const hideTimeoutRef = useRef<number | null>(null);
+	const lastTickRef = useRef(0);
 	const currentForceRef = useRef<{ direction: { x: number; y: number }; strength: number }>({
 		direction: { x: 0, y: 0 },
 		strength: 0,
@@ -67,12 +68,33 @@ export default function Page() {
 	const images = works.map(work => getOptimizedImage(work.image.src));
 
 	useEffect(() => {
-		return () => {
-			if (idleResetTimeoutRef.current) {
-				window.clearTimeout(idleResetTimeoutRef.current);
+		const DECAY_PER_SECOND = 4.2;
+		lastTickRef.current = performance.now();
+
+		const tick = (now: number) => {
+			const dt = Math.max(0, (now - lastTickRef.current) / 1000);
+			lastTickRef.current = now;
+
+			const current = currentForceRef.current;
+			if (current.strength > 0.0001) {
+				const nextStrength = Math.max(0, current.strength - DECAY_PER_SECOND * dt);
+				currentForceRef.current = {
+					direction: current.direction,
+					strength: nextStrength,
+				};
+				distortionRef.current?.setForce(current.direction, nextStrength);
 			}
-			if (easeOutRafRef.current) {
-				window.cancelAnimationFrame(easeOutRafRef.current);
+
+			decayRafRef.current = window.requestAnimationFrame(tick);
+		};
+
+		decayRafRef.current = window.requestAnimationFrame(tick);
+		return () => {
+			if (decayRafRef.current) {
+				window.cancelAnimationFrame(decayRafRef.current);
+			}
+			if (hideTimeoutRef.current) {
+				window.clearTimeout(hideTimeoutRef.current);
 			}
 		};
 	}, []);
@@ -82,56 +104,11 @@ export default function Page() {
 		distortionRef.current?.setForce(direction, strength);
 	};
 
-	const stopPendingResets = () => {
-		if (idleResetTimeoutRef.current) {
-			window.clearTimeout(idleResetTimeoutRef.current);
-			idleResetTimeoutRef.current = null;
-		}
-		if (easeOutRafRef.current) {
-			window.cancelAnimationFrame(easeOutRafRef.current);
-			easeOutRafRef.current = null;
-		}
-	};
-
-	const startEaseOutToZero = (durationMs = 300) => {
-		const startStrength = currentForceRef.current.strength;
-		const startDirection = { ...currentForceRef.current.direction };
-		const startTime = performance.now();
-
-		if (startStrength <= 0.0001) {
-			applyForce({ x: 0, y: 0 }, 0);
-			return;
-		}
-
-		const animate = (now: number) => {
-			const t = Math.min((now - startTime) / durationMs, 1);
-			const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
-			const nextStrength = startStrength * (1 - eased);
-			applyForce(startDirection, nextStrength);
-
-			if (t < 1) {
-				easeOutRafRef.current = window.requestAnimationFrame(animate);
-			} else {
-				applyForce({ x: 0, y: 0 }, 0);
-				easeOutRafRef.current = null;
-			}
-		};
-
-		easeOutRafRef.current = window.requestAnimationFrame(animate);
-	};
-
-	const scheduleForceReset = (delayMs = 120) => {
-		stopPendingResets();
-		idleResetTimeoutRef.current = window.setTimeout(() => {
-			startEaseOutToZero();
-		}, delayMs);
-	};
-
 	const handleMouseMove = (event: MouseEvent<HTMLElement>) => {
-		stopPendingResets();
+		if (!isFrameVisible || activeIndex == null) return;
+
 		const x = event.clientX;
 		const y = event.clientY;
-		setCursorPos({ x, y });
 
 		const width = window.innerWidth || 1;
 		const height = window.innerHeight || 1;
@@ -152,13 +129,34 @@ export default function Page() {
 				const dirY = dy / dist;
 				const speed = dist / dt; // px / ms
 				const strength = Math.min(speed * 0.8, 1);
-				// Aktualizujemy siłę na shaderze bez re-renderu Reacta
+				// Aktualizuje impuls od ruchu kursora.
 				applyForce({ x: dirX, y: dirY }, strength);
 			}
 		}
 
 		prevPosRef.current = { x, y, t: now };
-		scheduleForceReset(250);
+	};
+
+	const handleItemEnter = (index: number) => {
+		if (hideTimeoutRef.current) {
+			window.clearTimeout(hideTimeoutRef.current);
+			hideTimeoutRef.current = null;
+		}
+		setActiveIndex(index % works.length);
+		setIsFrameVisible(true);
+	};
+
+	const scheduleFrameHide = () => {
+		setIsFrameVisible(false);
+		prevPosRef.current = null;
+
+		if (hideTimeoutRef.current) {
+			window.clearTimeout(hideTimeoutRef.current);
+		}
+
+		hideTimeoutRef.current = window.setTimeout(() => {
+			setActiveIndex(null);
+		}, HIDE_FRAME_DELAY_MS);
 	};
 
 	if (images.length === 0) {
@@ -166,31 +164,34 @@ export default function Page() {
 	}
 
 	return (
-		<section
-			className="relative mx-auto h-full flex w-full max-w-2xl flex-col mt-10 items-center justify-center"
-			onMouseMove={handleMouseMove}
-		>
-			<DistortedImage ref={distortionRef} images={images} activeIndex={activeIndex} />
-			<ul
-				className={styles.workList}
-				onMouseLeave={() => {
-					setActiveIndex(null);
-					prevPosRef.current = null;
-					scheduleForceReset(200);
-				}}
-			>
+		<section className={styles.page} onMouseMove={handleMouseMove}>
+			<DistortedImage
+				ref={distortionRef}
+				images={images}
+				activeIndex={activeIndex}
+				className={`${styles.frameCanvas} ${isFrameVisible ? styles.frameCanvasVisible : ''}`}
+			/>
+			<ul className={styles.workList} onMouseLeave={scheduleFrameHide}>
 				{repeatedWorks.map((work, index) => (
-					<li
-						key={index}
-						className={styles.workItem}
-						onMouseEnter={() => setActiveIndex(index % works.length)}
-					>
+					<li key={index} className={styles.workItem} onMouseEnter={() => handleItemEnter(index)}>
 						<h2 className={styles.workTitle}>{work.title}</h2>
 						<p className={styles.workDescription}>{work.description}</p>
 						<span className={styles.workYear}>{work.year}</span>
 					</li>
 				))}
 			</ul>
+
+			<p className={styles.credit}>
+				INSPIRED BY:{' '}
+				<a
+					href="https://www.awwwards.com/inspiration/shader-image-distortion-gabriel-veres"
+					target="_blank"
+					rel="noopener noreferrer"
+					className={styles.creditLink}
+				>
+					https://www.awwwards.com/inspiration/shader-image-distortion-gabriel-veres
+				</a>
+			</p>
 		</section>
 	);
 }

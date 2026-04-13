@@ -1,3 +1,25 @@
+.page {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	max-width: 42rem;
+	height: 100%;
+	margin: 2.5rem auto 0;
+	padding: 4rem 0;
+}
+
+.frameCanvas {
+	opacity: 0;
+	transition: opacity 220ms ease-out;
+}
+
+.frameCanvasVisible {
+	opacity: 1;
+}
+
 .imageContainer {
 	display: none;
 }
@@ -19,9 +41,19 @@
 	padding: 1rem;
 	border-top: 1px solid white;
 	cursor: pointer;
-	transition: background 0.1s ease;
+	transition: background-color 0.1s ease;
 
 	&:hover {
-		background: rgba(255, 255, 255, 0.1);
+		background-color: rgba(255, 255, 255, 0.1);
 	}
+}
+
+.credit {
+	margin-top: auto;
+	font-size: 0.875rem;
+	color: rgb(107 114 128);
+}
+
+.creditLink {
+	color: rgb(59 130 246);
 }
