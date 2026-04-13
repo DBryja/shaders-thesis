@@ -1,7 +1,7 @@
 // INSPO: https://www.awwwards.com/inspiration/shader-image-distortion-gabriel-veres
 'use client';
 
-import { type StaticImageData } from 'next/image';
+import { getImageProps, type StaticImageData } from 'next/image';
 import { type MouseEvent, useEffect, useRef, useState } from 'react';
 
 import { DistortedImage, type DistortionHandle } from './components/DistortedImage';
@@ -45,15 +45,90 @@ const works: WorkItem[] = [
 	},
 ];
 
+function getOptimizedImage(url: string): string {
+	const currentDomain = process.env.NEXT_PUBLIC_URL || 'localhost:3000';
+	const img = getImageProps({ src: url, width: 600, height: 338, alt: '' });
+
+	return `${currentDomain}${img.props.src}`;
+}
+
 export default function Page() {
 	const repeatedWorks = [...works, ...works, ...works];
 	const distortionRef = useRef<DistortionHandle | null>(null);
 	const [activeIndex, setActiveIndex] = useState<number | null>(0);
 	const [, setCursorPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 	const prevPosRef = useRef<{ x: number; y: number; t: number } | null>(null);
-	const images = works.map((work) => work.image);
+	const idleResetTimeoutRef = useRef<number | null>(null);
+	const easeOutRafRef = useRef<number | null>(null);
+	const currentForceRef = useRef<{ direction: { x: number; y: number }; strength: number }>({
+		direction: { x: 0, y: 0 },
+		strength: 0,
+	});
+	const images = works.map(work => getOptimizedImage(work.image.src));
+
+	useEffect(() => {
+		return () => {
+			if (idleResetTimeoutRef.current) {
+				window.clearTimeout(idleResetTimeoutRef.current);
+			}
+			if (easeOutRafRef.current) {
+				window.cancelAnimationFrame(easeOutRafRef.current);
+			}
+		};
+	}, []);
+
+	const applyForce = (direction: { x: number; y: number }, strength: number) => {
+		currentForceRef.current = { direction, strength };
+		distortionRef.current?.setForce(direction, strength);
+	};
+
+	const stopPendingResets = () => {
+		if (idleResetTimeoutRef.current) {
+			window.clearTimeout(idleResetTimeoutRef.current);
+			idleResetTimeoutRef.current = null;
+		}
+		if (easeOutRafRef.current) {
+			window.cancelAnimationFrame(easeOutRafRef.current);
+			easeOutRafRef.current = null;
+		}
+	};
+
+	const startEaseOutToZero = (durationMs = 300) => {
+		const startStrength = currentForceRef.current.strength;
+		const startDirection = { ...currentForceRef.current.direction };
+		const startTime = performance.now();
+
+		if (startStrength <= 0.0001) {
+			applyForce({ x: 0, y: 0 }, 0);
+			return;
+		}
+
+		const animate = (now: number) => {
+			const t = Math.min((now - startTime) / durationMs, 1);
+			const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+			const nextStrength = startStrength * (1 - eased);
+			applyForce(startDirection, nextStrength);
+
+			if (t < 1) {
+				easeOutRafRef.current = window.requestAnimationFrame(animate);
+			} else {
+				applyForce({ x: 0, y: 0 }, 0);
+				easeOutRafRef.current = null;
+			}
+		};
+
+		easeOutRafRef.current = window.requestAnimationFrame(animate);
+	};
+
+	const scheduleForceReset = (delayMs = 120) => {
+		stopPendingResets();
+		idleResetTimeoutRef.current = window.setTimeout(() => {
+			startEaseOutToZero();
+		}, delayMs);
+	};
 
 	const handleMouseMove = (event: MouseEvent<HTMLElement>) => {
+		stopPendingResets();
 		const x = event.clientX;
 		const y = event.clientY;
 		setCursorPos({ x, y });
@@ -78,12 +153,17 @@ export default function Page() {
 				const speed = dist / dt; // px / ms
 				const strength = Math.min(speed * 0.8, 1);
 				// Aktualizujemy siłę na shaderze bez re-renderu Reacta
-				distortionRef.current?.setForce({ x: dirX, y: dirY }, strength);
+				applyForce({ x: dirX, y: dirY }, strength);
 			}
 		}
 
 		prevPosRef.current = { x, y, t: now };
+		scheduleForceReset(250);
 	};
+
+	if (images.length === 0) {
+		return null;
+	}
 
 	return (
 		<section
@@ -91,7 +171,14 @@ export default function Page() {
 			onMouseMove={handleMouseMove}
 		>
 			<DistortedImage ref={distortionRef} images={images} activeIndex={activeIndex} />
-			<ul className={styles.workList} onMouseLeave={() => setActiveIndex(null)}>
+			<ul
+				className={styles.workList}
+				onMouseLeave={() => {
+					setActiveIndex(null);
+					prevPosRef.current = null;
+					scheduleForceReset(200);
+				}}
+			>
 				{repeatedWorks.map((work, index) => (
 					<li
 						key={index}

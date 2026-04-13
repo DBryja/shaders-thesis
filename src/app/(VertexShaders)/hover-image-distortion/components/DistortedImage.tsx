@@ -11,7 +11,7 @@ import fragmentShader from '../shaders/hoverImage.frag';
 import vertexShader from '../shaders/hoverImage.vert';
 
 interface DistortedImageProps {
-	images: StaticImageData[];
+	images: StaticImageData[] | string[];
 	activeIndex: number | null;
 }
 
@@ -44,13 +44,13 @@ function DistortedPlane({
 	centerRef,
 	frameWidth,
 }: {
-	images: StaticImageData[];
+	images: (StaticImageData | string)[];
 	activeIndex: number | null;
 	forceRef: React.RefObject<MouseForce>;
 	centerRef: React.RefObject<Center>;
 	frameWidth: number;
 }) {
-	const textureUrls = images.map(image => image.src);
+	const textureUrls = images.map(image => (typeof image === 'string' ? image : image.src));
 	const textures = useTexture(textureUrls) as THREE.Texture[];
 
 	const timerRef = useRef(new Timer());

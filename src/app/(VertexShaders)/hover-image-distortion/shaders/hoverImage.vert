@@ -12,41 +12,43 @@ void main() {
 	// UV zcentrowane wokół (0.0, 0.0) i przeskalowane do zakresu [-1, 1]
 	vec2 centeredUv = (uv - 0.5) * 2.0;
 
-	// Kierunek ruchu myszy znormalizowany
+	// Kierunek ruchu myszy przekazany z JS jest już tweenowany
+	// w czasie (MathUtils.damp), więc NIE normalizujemy go tutaj,
+	// żeby nie zgubić płynności ani nie wymuszać skoków -1/1.
 	vec2 dir = uDirection;
-	float dirLen = length(dir);
-	if (dirLen > 0.0001) {
-		dir /= dirLen;
-	} else {
-		dir = vec2(0.0);
-	}
 
-	// Interesuje nas tylko pozioma składowa kierunku
-	float horizDir = dir.x; // -1..1, lewo/prawo
+	// Składowe kierunku delikatnie clampujemy, bez sign/step,
+	// żeby wszystko pozostało ciągłe.
+	float horizDir = clamp(dir.x, -1.0, 1.0); // ~-1..1, lewo/prawo
 	float horizMag = abs(horizDir);
+	float vertDir = clamp(dir.y, -1.0, 1.0); // ~-1..1, góra/dół
+	float vertMag = abs(vertDir);
 
-	// Jedna gładka krzywa w pionie:
-	//  - max w centrum wysokości,
-	//  - rogi nadal lekko pracują (minCornerWeight > 0).
-	float minCornerWeight = 0.25;
-	float falloffPower = 1.5;
-	float orthWeight = minCornerWeight + (1.0 - minCornerWeight) * (1.0 - pow(abs(centeredUv.y), falloffPower));
+	// Pojedynczy, gładki łuk paraboliczny po osi Y:
+	//  - maksimum w środku (y = 0),
+	//  - wygasa do zera na górnej i dolnej krawędzi (y = +/-1).
+	float orthWeight = 1.0 - centeredUv.y * centeredUv.y;
+	// Analogiczny profil dla pionu: łuk po osi X.
+	float sideWeight = 1.0 - centeredUv.x * centeredUv.x;
 
-	// Pozycja wzdłuż osi X względem kierunku (tył/przód)
-	float along = centeredUv.x * sign(horizDir); // -1..1
-
-	// Profil rozciągania wzdłuż poziomej osi – obie strony się przesuwają,
-	// ale "przód" (w kierunku ruchu) dostaje większy offset.
-	float frontFactor = clamp(along * 0.5 + 0.5, 0.0, 1.0); // 0..1
+	// Zamiast liczyć along per-vertex (co powodowało przeskoki
+	// między ekstremami), robimy prosty profil zależny tylko od
+	// siły poziomej składowej kierunku.
 	float baseFactor = 0.2;
-	float maxFactor = 0.6; // ograniczenie maksymalnego odchylenia
-	float stretchProfile = mix(baseFactor, maxFactor, frontFactor);
+	float maxFactor = 0.45; // łagodniejsza krzywizna
+	float dirFactorX = mix(baseFactor, maxFactor, horizMag);
+	float dirFactorY = mix(baseFactor * 0.35, maxFactor * 0.35, vertMag); // pion subtelniejszy
 
-	float intensity = orthWeight * stretchProfile * horizMag;
+	float intensityX = orthWeight * dirFactorX;
+	float intensityY = sideWeight * dirFactorY;
 
-	// Przesuwamy wierzchołki wyłącznie w poziomie, zredukowana amplituda
-	float dispX = sign(horizDir) * uStrength * intensity;
+	// Przesuwamy w obu osiach:
+	// - poziom pozostaje głównym efektem,
+	// - pion działa analogicznie, ale delikatniej.
+	float dispX = horizDir * uStrength * intensityX;
+	float dispY = vertDir * uStrength * intensityY;
 	pos.x += dispX;
+	pos.y += dispY;
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
