@@ -26,7 +26,13 @@ function fitFov(distance: number, aspect: number): number {
 	return fovRad * radToDeg;
 }
 
-export function DemoCanvas({ children, background: _background = '#0a0a0f', orbit = true, camera, lights = true }: DemoCanvasProps) {
+export function DemoCanvas({
+	children,
+	background: _background = '#0a0a0f',
+	orbit = true,
+	camera,
+	lights = true,
+}: DemoCanvasProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [size, setSize] = useState({ width: 1, height: 1 });
 
@@ -51,22 +57,24 @@ export function DemoCanvas({ children, background: _background = '#0a0a0f', orbi
 	return (
 		<div ref={containerRef} className="relative h-full w-full">
 			<BodyPortal>
-				<Leva
-					collapsed
-					theme={{
-						colors: {
-							accent1: '#007bff',
-							accent2: '#3399ff',
-							accent3: '#66b3ff',
-							elevation1: '#1a1a1a',
-							elevation2: '#2a2a2a',
-							elevation3: '#3a3a3a',
-							highlight1: '#ffffff',
-							highlight2: '#f0f0f0',
-							highlight3: '#e0e0e0',
-						},
-					}}
-				/>
+				<div data-leva-root>
+					<Leva
+						collapsed
+						theme={{
+							colors: {
+								accent1: '#007bff',
+								accent2: '#3399ff',
+								accent3: '#66b3ff',
+								elevation1: '#1a1a1a',
+								elevation2: '#2a2a2a',
+								elevation3: '#3a3a3a',
+								highlight1: '#ffffff',
+								highlight2: '#f0f0f0',
+								highlight3: '#e0e0e0',
+							},
+						}}
+					/>
+				</div>
 			</BodyPortal>
 
 			<Canvas
