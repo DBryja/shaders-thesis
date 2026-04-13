@@ -39,3 +39,12 @@ body:has(#ui-toggle:checked) {
 		display: none !important;
 	}
 }
+
+div[data-leva-root] {
+	z-index: 9999 !important;
+	position: fixed !important;
+	inset: 0;
+}
+div[data-leva-root] * {
+	z-index: 9999 !important;
+}

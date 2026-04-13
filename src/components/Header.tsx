@@ -15,7 +15,11 @@ const routeGroups: RouteGroup[] = [
 	},
 	{
 		group: 'Vertex Shaders',
-		routes: [{ name: 'HoverImageDistortion', href: '/hover-image-distortion' }],
+		routes: [{ name: 'Hover Image Distortion', href: '/hover-image-distortion' }],
+	},
+	{
+		group: 'Fragment Shaders',
+		routes: [{ name: 'Flowing Gradient', href: '/flowing-gradient' }],
 	},
 ];
 

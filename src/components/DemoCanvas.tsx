@@ -3,6 +3,8 @@ import { Canvas } from '@react-three/fiber';
 import { Leva } from 'leva';
 import { ReactNode, useLayoutEffect, useRef, useState } from 'react';
 
+import BodyPortal from './BodyPortal';
+
 interface DemoCanvasProps {
 	children: ReactNode;
 	background?: string;
@@ -24,7 +26,7 @@ function fitFov(distance: number, aspect: number): number {
 	return fovRad * radToDeg;
 }
 
-export function DemoCanvas({ children, background = '#0a0a0f', orbit = true, camera, lights = true }: DemoCanvasProps) {
+export function DemoCanvas({ children, background: _background = '#0a0a0f', orbit = true, camera, lights = true }: DemoCanvasProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [size, setSize] = useState({ width: 1, height: 1 });
 
@@ -48,7 +50,7 @@ export function DemoCanvas({ children, background = '#0a0a0f', orbit = true, cam
 
 	return (
 		<div ref={containerRef} className="relative h-full w-full">
-			<div data-leva-root>
+			<BodyPortal>
 				<Leva
 					collapsed
 					theme={{
@@ -65,7 +67,7 @@ export function DemoCanvas({ children, background = '#0a0a0f', orbit = true, cam
 						},
 					}}
 				/>
-			</div>
+			</BodyPortal>
 
 			<Canvas
 				camera={{
