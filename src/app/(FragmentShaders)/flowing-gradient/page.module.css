@@ -30,8 +30,11 @@
 	justify-content: space-between;
 	gap: 2rem;
 	padding: clamp(1rem, 1.5vw, 3rem) clamp(1rem, 3vw, 5rem);
-	pointer-events: auto;
 	font-family: var(--font-geist-sans), system-ui, sans-serif;
+
+	> * {
+		pointer-events: auto;
+	}
 }
 
 .brand {

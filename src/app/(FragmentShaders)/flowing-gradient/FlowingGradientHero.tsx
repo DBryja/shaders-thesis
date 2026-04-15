@@ -87,8 +87,17 @@ function ProceduralGradientPlane({
 		uGradientShift: { value: defaults.gradientShift },
 		uVignette: { value: defaults.vignette },
 		uSaturation: { value: defaults.saturation },
-		...(withReach ? { uReach: { value: defaults.reach } } : {}),
+		...(withReach
+			? {
+					uReach: { value: defaults.reach },
+					uCursor: { value: new THREE.Vector2(0, 0) },
+					uCursorBlobScale: { value: 0 },
+				}
+			: {}),
 	});
+	const cursorRef = useRef(new THREE.Vector2(0, 0));
+	const cursorTargetRef = useRef(new THREE.Vector2(0, 0));
+	const cursorBlobScaleRef = useRef(0);
 
 	const controls = useProceduralGradientControls(defaults, label, withReach);
 	const {
@@ -106,11 +115,15 @@ function ProceduralGradientPlane({
 		reach,
 	} = controls as typeof controls & { reach?: number };
 
-	const { size } = useThree();
+	const { pointer, size } = useThree();
 
 	useFrame(() => {
 		timerRef.current.update();
-		const u = uniformsRef.current as typeof uniformsRef.current & { uReach?: { value: number } };
+		const u = uniformsRef.current as typeof uniformsRef.current & {
+			uReach?: { value: number };
+			uCursor?: { value: THREE.Vector2 };
+			uCursorBlobScale?: { value: number };
+		};
 		u.uTime.value = timerRef.current.getElapsed() * timeMultiplier;
 		u.uResolution.value.set(size.width, size.height);
 		u.uNoiseScale.value = noiseScale;
@@ -121,6 +134,18 @@ function ProceduralGradientPlane({
 		u.uSaturation.value = saturation;
 		if (withReach && u.uReach) {
 			u.uReach.value = reach ?? defaults.reach;
+		}
+		if (withReach && u.uCursor) {
+			const aspect = size.width / Math.max(size.height, 1);
+			cursorTargetRef.current.set(pointer.x * 0.5 * aspect, pointer.y * 0.5);
+			cursorRef.current.lerp(cursorTargetRef.current, 0.14);
+			u.uCursor.value.copy(cursorRef.current);
+			const isInsideCanvas = Math.abs(pointer.x) <= 0.95 && Math.abs(pointer.y) <= 0.95;
+			const targetScale = isInsideCanvas ? 1 : 0;
+			cursorBlobScaleRef.current = THREE.MathUtils.lerp(cursorBlobScaleRef.current, targetScale, 0.04);
+			if (u.uCursorBlobScale) {
+				u.uCursorBlobScale.value = cursorBlobScaleRef.current;
+			}
 		}
 		colorDeep.current.set(deepHex);
 		colorMid.current.set(midHex);
@@ -258,7 +283,7 @@ export default function FlowingGradientHero({ slug }: { slug: GradientSlug }) {
 	const preset = GRADIENT_PRESETS[slug];
 
 	return (
-		<div className={styles.page}>
+		<div className={styles.page} data-page-gradients>
 			<div className={styles.canvasLayer}>
 				<DemoCanvas orbit={false} lights={false} camera={{ position: [0, 0, 1], fov: 'auto' }}>
 					{slug === 'snowy' || slug === 'blob' ? (

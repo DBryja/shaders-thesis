@@ -12,6 +12,8 @@ uniform float uGradientShift;
 uniform float uVignette;
 uniform float uSaturation;
 uniform float uReach;
+uniform vec2 uCursor;
+uniform float uCursorBlobScale;
 
 varying vec2 vUv;
 
@@ -34,6 +36,7 @@ void main() {
 
 	float zoom = 0.52 + uNoiseScale * 0.14;
 	p *= zoom;
+	vec2 cursor = uCursor * zoom;
 
 	float t = uTime;
 	vec2 drift = uFlow * t * 0.1;
@@ -57,6 +60,8 @@ void main() {
 	field += softBlob(p, s0, 0.044) * 0.55;
 	field += softBlob(p, s1, 0.038) * 0.5;
 	field += softBlob(p, s2, 0.032) * 0.45;
+	float cursorScale = clamp(uCursorBlobScale, 0.0, 1.0);
+	field += softBlob(p, cursor, 0.11 * cursorScale) * (0.9 * cursorScale);
 
 	float iso = 0.38 + uGradientShift * 0.12;
 	float edge = 0.062 / max(uContrast, 0.35);

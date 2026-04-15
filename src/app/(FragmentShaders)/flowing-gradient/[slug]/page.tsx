@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-
 import FlowingGradientHero from '../FlowingGradientHero';
 import { GRADIENT_ORDER, isGradientSlug } from '../config';
 

@@ -35,7 +35,7 @@ div[data-leva-root] {
 body:has(#ui-toggle:checked) {
 	aside,
 	#header,
-	div[data-leva-root] {
+	div[data-leva-root] > div {
 		display: none !important;
 	}
 }
@@ -44,7 +44,17 @@ div[data-leva-root] {
 	z-index: 9999 !important;
 	position: fixed !important;
 	inset: 0;
+	@starting-style {
+		opacity: 0;
+	}
+	transition: opacity 0.3s ease 1s;
 }
-div[data-leva-root] * {
+
+div[data-leva-root] > div {
 	z-index: 9999 !important;
+}
+
+body:has([data-page-gradients]) [data-leva-root] > div {
+	top: calc(clamp(1rem, 1.5vw, 3rem) + 2rem);
+	right: clamp(1rem, 3vw, 5rem);
 }
