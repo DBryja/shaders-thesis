@@ -1,0 +1,6 @@
+.page {
+	position: fixed;
+	inset: 0;
+	background: #050508;
+	overflow: hidden;
+}
