@@ -15,6 +15,9 @@ uniform float uSpawnTop;
 uniform float uSpawnBottom;
 uniform float uLogoHalfWidth;
 uniform float uLogoWidthRatio;
+uniform vec2 uCursor;
+uniform float uCursorRadius;
+uniform float uCursorStrength;
 
 float hash(vec2 p) {
 	float h = dot(p, vec2(127.1, 311.7));
@@ -151,6 +154,17 @@ void main() {
 
 		float windMul = mix(1.0, 0.12, settled);
 		newVel += (curl + vec2(gustX, gustY)) * uWindStrength * windMul * dt;
+
+		// Cursor repulsion
+		vec2 toCursor = pos - uCursor;
+		float cursorDist = length(toCursor);
+		if (cursorDist < uCursorRadius && cursorDist > 0.0001) {
+			vec2 pushDir = toCursor / cursorDist;
+			float falloff = 1.0 - cursorDist / uCursorRadius;
+			falloff = falloff * falloff;
+			newVel += pushDir * falloff * uCursorStrength * dt;
+			newSettled = max(0.0, settled - 0.15);
+		}
 
 		// Attractor
 		float fieldBlurred = sampleAttractor(pos);

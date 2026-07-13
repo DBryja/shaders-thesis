@@ -328,6 +328,7 @@ function ParticleSand() {
 	const attractorTexRef = useRef<THREE.DataTexture | null>(null);
 	const logoImgRef = useRef<HTMLImageElement | null>(null);
 	const gpgpuRef = useRef<GPGPUState | null>(null);
+	const cursorWorldRef = useRef(new THREE.Vector2(999, 999));
 
 	const { dataWidth, dataHeight, particleCount, logoWidthRatio, pointSize } = useControls('System', {
 		dataWidth: { value: DEFAULTS.dataWidth, min: 256, max: 1024, step: 64 },
@@ -384,6 +385,9 @@ function ParticleSand() {
 				uSpawnBottom: { value: DEFAULTS.spawnBottom },
 				uLogoHalfWidth: { value: DEFAULTS.logoHalfWidth },
 				uLogoWidthRatio: { value: DEFAULTS.logoWidthRatio },
+				uCursor: { value: new THREE.Vector2(999, 999) },
+				uCursorRadius: { value: 0.25 },
+				uCursorStrength: { value: 0.01 },
 			},
 		});
 
@@ -460,11 +464,23 @@ function ParticleSand() {
 		[]
 	);
 
-	useFrame((_state, delta) => {
+	useFrame((state, delta) => {
 		const g = gpgpuRef.current;
 		if (!g) return;
 		const mat = matRef.current;
 		if (!mat) return;
+
+		// Cursor world position = intersection of pointer ray with z=0 plane (particle plane).
+		// This stays correct for perspective camera, DPR, resize, etc.
+		const ray = state.raycaster.ray;
+		const dz = ray.direction.z;
+		if (Math.abs(dz) > 1e-6) {
+			const t = -ray.origin.z / dz;
+			cursorWorldRef.current.set(ray.origin.x + ray.direction.x * t, ray.origin.y + ray.direction.y * t);
+		} else {
+			// Extremely rare edge case: ray parallel to plane
+			cursorWorldRef.current.set(999, 999);
+		}
 
 		const { posRT, velRT, simMaterial, quadScene, quadCamera } = g;
 		const curr = g.currentIdx;
@@ -476,6 +492,13 @@ function ParticleSand() {
 		simMaterial.uniforms.uVelocities!.value = velRT[curr]!.texture;
 		simMaterial.uniforms.uTime!.value += dt;
 		simMaterial.uniforms.uDelta!.value = dt;
+		// Simulation runs in "unscaled" space, render scales by `uScale` in `void.vert`.
+		// Convert cursor from world-space back into simulation-space to avoid edge drift.
+		const simScale = viewport.width * 0.5;
+		simMaterial.uniforms.uCursor!.value.set(
+			cursorWorldRef.current.x / simScale,
+			cursorWorldRef.current.y / simScale
+		);
 		simMaterial.uniforms.uResolution!.value.set(dataWidth, dataHeight);
 		simMaterial.uniforms.uGravity!.value = gravity;
 		simMaterial.uniforms.uWindStrength!.value = windStrength;
