@@ -10,7 +10,7 @@ void main() {
 	float glow = exp(-d * 2.5) * 0.5;
 	float brightness = core + glow;
 
-	vec3 coldCol = vec3(0.85, 0.88, 1.0);
+	vec3 coldCol = vec3(0.92, 0.94, 1.0);
 	vec3 hotCol = vec3(1.0, 1.0, 1.0);
 	vec3 col = mix(coldCol, hotCol, vSettled) * brightness;
 

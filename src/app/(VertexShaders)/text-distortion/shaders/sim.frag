@@ -138,7 +138,8 @@ void main() {
 		}
 
 		// Gravity
-		newVel.y += uGravity * dt * (1.0 - settled * 0.98);
+		float fallMul = mix(1.65, 1.0 - settled * 0.98, settled);
+		newVel.y += uGravity * dt * fallMul;
 
 		// Wind
 		float windPhaseX = sin(uTime * 0.4) * 0.25 + cos(uTime * 0.15) * 0.15;

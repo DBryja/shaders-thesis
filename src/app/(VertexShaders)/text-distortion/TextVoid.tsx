@@ -19,18 +19,18 @@ const TEXTURE_PIXELS = DATA_WIDTH * DATA_HEIGHT;
 const DEFAULTS = {
 	dataWidth: DATA_WIDTH,
 	dataHeight: DATA_HEIGHT,
-	particleCount: (DATA_WIDTH * DATA_HEIGHT) / 2,
+	particleCount: 40000,
 	logoWidthRatio: 1,
-	gravity: -0.00011,
-	windStrength: 0.00599,
+	gravity: -0.00069,
+	windStrength: 0.00769,
 	damping: 0.596,
 	settleDamping: 0.5,
-	attractStrength: 0.0001,
-	speedScale: 0.5,
-	spawnTop: 1.6,
-	spawnBottom: -1.8,
+	attractStrength: 0.000001,
+	speedScale: 0.35,
+	spawnTop: 2,
+	spawnBottom: -2,
 	logoHalfWidth: 1.0,
-	pointSize: 10.0,
+	pointSize: 12.0,
 } as const;
 
 function hash01(n: number): number {
