@@ -22,7 +22,10 @@ const routeGroups: RouteGroup[] = [
 	},
 	{
 		group: 'Fragment Shaders',
-		routes: [{ name: 'Flowing Gradient', href: '/flowing-gradient' }],
+		routes: [
+			{ name: 'Flowing Gradient', href: '/flowing-gradient' },
+			{ name: 'Dither', href: '/dither' },
+		],
 	},
 ];
 

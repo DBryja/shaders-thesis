@@ -1,0 +1,2 @@
+# GT3 helmet GLTF is served from /public/dither
+# (gt3-helmet.gltf + buffer.bin). Symlinks in this folder point there.
