@@ -19,11 +19,11 @@ import {
 } from './perfTestRunner';
 
 const DEFAULT_COUNTS: Record<PerfEffect, string> = {
-	dom: '500, 1000, 2000, 4000',
-	canvas: '1000, 5000, 10000, 25000',
-	shaders: '10000, 50000, 100000, 250000',
-	branching: '20000, 50000, 100000, 200000',
-	branchless: '20000, 50000, 100000, 200000',
+	dom: '500, 3000, 8000',
+	canvas: '500, 3000, 8000, 30000, 50000',
+	shaders: '500, 8000, 30000, 50000, 100000, 500000, 1000000',
+	branching: '20000, 100000, 500000, 1000000',
+	branchless: '20000, 100000, 500000, 1000000',
 };
 
 /** Module registry — works across R3F Canvas (no React context bridge needed). */
