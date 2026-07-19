@@ -78,7 +78,8 @@ vec3 shade(float lum, float threshold, float paperMask) {
 }
 
 vec4 asciiPass(vec2 uv) {
-	vec2 cell = resolution / max(uCellSize, 2.0);
+	float cellPx = max(uCellSize, 2.0);
+	vec2 cell = resolution / cellPx;
 	vec2 grid = 1.0 / cell;
 	vec2 pixelizedUV = grid * (0.5 + floor(uv / grid));
 	vec4 pixelized = texture2D(inputBuffer, pixelizedUV);
@@ -89,11 +90,13 @@ vec4 asciiPass(vec2 uv) {
 		grey = 1.0 - grey;
 	}
 
-	float characterIndex = floor((max(uCharactersCount, 2.0) - 1.0) * grey);
+	float charCount = max(uCharactersCount, 2.0);
+	float characterIndex = floor((charCount - 1.0) * grey);
 	vec2 characterPosition = vec2(
 		mod(characterIndex, ASCII_ATLAS.x),
-		floor(characterIndex / ASCII_ATLAS.x)
+		floor(characterIndex / ASCII_ATLAS.y)
 	);
+	// Atlas UV (matches emilwidlund/ASCII + CanvasTexture flipY)
 	vec2 offset = vec2(characterPosition.x, -characterPosition.y) / ASCII_ATLAS;
 	vec2 charUV = mod(uv * (cell / ASCII_ATLAS), 1.0 / ASCII_ATLAS) - vec2(0.0, 1.0 / ASCII_ATLAS) + offset;
 	float glyph = texture2D(uCharacters, charUV).r;
@@ -102,8 +105,10 @@ vec4 asciiPass(vec2 uv) {
 	if (uColorMode < 0.5) {
 		color = vec3(glyph);
 	} else {
+		float levels = max(uGradientLevels, 2.0);
+		float quantized = floor(grey * (levels - 1.0) + 0.5) / (levels - 1.0);
 		vec3 paper = sampleGradient(0.0);
-		vec3 ink = sampleGradient(grey);
+		vec3 ink = sampleGradient(quantized);
 		color = mix(paper, ink, glyph);
 	}
 

@@ -2,9 +2,9 @@
 
 import { Center, Environment, useGLTF, useTexture } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { ASCII, EffectComposer } from '@react-three/postprocessing';
+import { EffectComposer } from '@react-three/postprocessing';
 import { folder, useControls } from 'leva';
-import { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 import perlinNoiseSrc from '@/assets/perlin-noise-500.png';
@@ -87,7 +87,7 @@ function useDitherControls() {
 			options: ['bw', 'gradient'],
 		},
 		includeBackground: {
-			value: true,
+			value: false,
 			label: 'Dither background',
 		},
 		Pattern: folder({
@@ -249,52 +249,44 @@ function DitherPostProcessing() {
 		gradientC,
 	} = controls;
 
-	// Built-in ASCII has no depth mask — use it only when dithering the full frame.
-	const useBuiltinAscii = mode === 'ascii' && colorMode === 'bw' && includeBackground;
-
 	return (
 		<EffectComposer key={`${mode}-${colorMode}-${includeBackground}`} multisampling={0} depthBuffer>
-			{useBuiltinAscii ? (
-				<ASCII
-					characters={DEFAULT_CHARACTERS}
-					fontSize={64}
-					cellSize={cellSize}
-					invert={invert}
-					color="#ffffff"
-				/>
-			) : (
-				<CustomDitherEffect
-					mode={mode}
-					colorMode={colorMode}
-					includeBackground={includeBackground}
-					gridSize={gridSize}
-					pixelSizeRatio={pixelSizeRatio}
-					bias={bias}
-					noiseScale={noiseScale}
-					cellSize={cellSize}
-					invert={invert}
-					dotScale={dotScale}
-					gradientLevels={gradientLevels}
-					ditherStrength={ditherStrength}
-					gradientA={gradientA}
-					gradientB={gradientB}
-					gradientC={gradientC}
-				/>
-			)}
+			<CustomDitherEffect
+				mode={mode}
+				colorMode={colorMode}
+				includeBackground={includeBackground}
+				gridSize={gridSize}
+				pixelSizeRatio={pixelSizeRatio}
+				bias={bias}
+				noiseScale={noiseScale}
+				cellSize={cellSize}
+				invert={invert}
+				dotScale={dotScale}
+				gradientLevels={gradientLevels}
+				ditherStrength={ditherStrength}
+				gradientA={gradientA}
+				gradientB={gradientB}
+				gradientC={gradientC}
+			/>
 		</EffectComposer>
 	);
 }
 
 function Scene() {
-	const { background, envIntensity, lightIntensity } = useControls('Scene', {
-		background: { value: '#1a1a1a', label: 'Background' },
-		envIntensity: { value: 0.35, min: 0, max: 1.5, step: 0.05, label: 'Env intensity' },
-		lightIntensity: { value: 0.7, min: 0, max: 2, step: 0.05, label: 'Key light' },
+	const [background, setBackground] = useState('#1a1a1a');
+	const { envIntensity, lightIntensity } = useControls('Scene', {
+		background: {
+			value: '#1a1a1a',
+			label: 'Background',
+			onChange: setBackground,
+		},
+		envIntensity: { value: 0.75, min: 0, max: 1.5, step: 0.05, label: 'Env intensity' },
+		lightIntensity: { value: 1.5, min: 0, max: 2, step: 0.05, label: 'Key light' },
 	});
 
 	return (
 		<>
-			<color attach="background" args={[background]} />
+			<color key={background} attach="background" args={[background]} />
 			<ambientLight intensity={0.45} />
 			<directionalLight position={[3.5, 5, 4]} intensity={lightIntensity} />
 			<directionalLight position={[-3, 1.5, -2]} intensity={0.25} />
@@ -311,15 +303,11 @@ export default function DitherDemo() {
 	return (
 		<div className={styles.page}>
 			<div className={styles.canvasLayer}>
-				<DemoCanvas camera={{ position: [0, 0.1, 4.8], fov: 35 }} lights={false} orbit>
+				<DemoCanvas camera={{ position: [0, 0.25, 120], fov: 35 }} lights={false} orbit>
 					<Suspense fallback={null}>
 						<Scene />
 					</Suspense>
 				</DemoCanvas>
-			</div>
-			<div className={styles.overlay}>
-				<p className={styles.label}>Dither Post-Processing</p>
-				<p className={styles.hint}>Halftone · Noise · ASCII · Leva controls</p>
 			</div>
 		</div>
 	);
