@@ -17,7 +17,7 @@ const routeGroups: RouteGroup[] = [
 		group: 'Vertex Shaders',
 		routes: [
 			{ name: 'Hover Image Distortion', href: '/hover-image-distortion' },
-			{ name: 'Text Distortion', href: '/text-distortion' },
+			{ name: 'Text Particles', href: '/text-particles' },
 		],
 	},
 	{

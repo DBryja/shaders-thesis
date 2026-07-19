@@ -422,7 +422,7 @@ function ParticleSand() {
 			posTex.dispose();
 			velTex.dispose();
 		};
-		img.src = '/text-distortion-white-text.png';
+		img.src = '/text-particles-white-text.png';
 	}, [gl]);
 
 	useEffect(() => {
