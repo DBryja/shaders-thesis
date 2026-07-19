@@ -1,0 +1,172 @@
+.shell {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background: #07070a;
+	color: #f4f4f5;
+}
+
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem 0.75rem 4.5rem;
+	border-bottom: 1px solid rgb(255 255 255 / 8%);
+	background: linear-gradient(180deg, #0e0e14 0%, #07070a 100%);
+	z-index: 2;
+}
+
+.meta {
+	max-width: 36rem;
+}
+
+.eyebrow {
+	margin: 0 0 0.25rem;
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #a1a1aa;
+}
+
+.eyebrow a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.eyebrow a:hover {
+	color: #e4e4e7;
+}
+
+.title {
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.subtitle {
+	margin: 0.35rem 0 0;
+	font-size: 0.8rem;
+	line-height: 1.45;
+	color: #a1a1aa;
+}
+
+.nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.navLink,
+.navActive {
+	padding: 0.35rem 0.7rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	text-decoration: none;
+	border: 1px solid rgb(255 255 255 / 12%);
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.navLink {
+	color: #d4d4d8;
+	background: transparent;
+}
+
+.navLink:hover {
+	background: rgb(255 255 255 / 6%);
+	color: #fff;
+}
+
+.navActive {
+	color: #0a0a0a;
+	background: #e4e4e7;
+	border-color: #e4e4e7;
+}
+
+.stage {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.viewport {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	cursor: crosshair;
+	touch-action: none;
+}
+
+.hub {
+	min-height: 100vh;
+	padding: 3rem 1.5rem 3rem 5rem;
+	background:
+		radial-gradient(ellipse 80% 50% at 20% 0%, rgb(56 56 90 / 35%), transparent),
+		#07070a;
+	color: #f4f4f5;
+}
+
+.hubInner {
+	max-width: 42rem;
+}
+
+.hubTitle {
+	margin: 0 0 0.75rem;
+	font-size: 2rem;
+	font-weight: 600;
+	letter-spacing: -0.03em;
+}
+
+.hubLead {
+	margin: 0 0 2rem;
+	font-size: 0.95rem;
+	line-height: 1.65;
+	color: #a1a1aa;
+}
+
+.hubList {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.hubCard {
+	display: block;
+	padding: 1rem 1.15rem;
+	border: 1px solid rgb(255 255 255 / 10%);
+	border-radius: 0.75rem;
+	background: rgb(255 255 255 / 3%);
+	text-decoration: none;
+	color: inherit;
+	transition:
+		border-color 0.15s ease,
+		background 0.15s ease;
+}
+
+.hubCard:hover {
+	border-color: rgb(255 255 255 / 22%);
+	background: rgb(255 255 255 / 6%);
+}
+
+.hubCardTitle {
+	margin: 0 0 0.35rem;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.hubCardDesc {
+	margin: 0;
+	font-size: 0.8rem;
+	line-height: 1.5;
+	color: #a1a1aa;
+}

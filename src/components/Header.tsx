@@ -27,6 +27,18 @@ const routeGroups: RouteGroup[] = [
 			{ name: 'Dither', href: '/dither' },
 		],
 	},
+	{
+		group: 'Comparison',
+		routes: [
+			{ name: 'DOM / Canvas / Shaders', href: '/comparison' },
+			{ name: 'DOM', href: '/comparison/dom' },
+			{ name: 'Canvas', href: '/comparison/canvas' },
+			{ name: 'Shaders', href: '/comparison/shaders' },
+			{ name: 'Branching vs Branchless', href: '/comparison-shaders' },
+			{ name: 'Branching', href: '/comparison-shaders/branching' },
+			{ name: 'Branchless', href: '/comparison-shaders/branchless' },
+		],
+	},
 ];
 
 export default function Header() {
