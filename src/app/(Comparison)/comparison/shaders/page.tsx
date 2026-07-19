@@ -2,13 +2,14 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 import { DemoCanvas } from '@/components/DemoCanvas';
 
 import { ComparisonShell } from '../shared/ComparisonShell';
 import { generateCircleDots, packPositions } from '../shared/generateDots';
+import { useRegisterPerfEffect } from '../shared/PerfTestProvider';
 import { useStatsMonitor } from '../shared/useStatsMonitor';
 import fragmentShader from './shaders/points.frag';
 import vertexShader from './shaders/points.vert';
@@ -16,18 +17,34 @@ import vertexShader from './shaders/points.vert';
 const CIRCLE_RADIUS = 1;
 
 function ShaderPoints() {
-	const { count, minSize, maxSize, displaceRadius, displaceStrength } = useControls('Shaders', {
-		count: { value: 20_000, min: 1000, max: 1_000_000, step: 10_000 },
+	const [count, setCount] = useState(20_000);
+	const { minSize, maxSize, displaceRadius, displaceStrength } = useControls('Shaders', {
+		count: {
+			value: 20_000,
+			min: 1000,
+			max: 1_000_000,
+			step: 10_000,
+			onChange: setCount,
+		},
 		minSize: { value: 2, min: 0.5, max: 16, step: 0.5, label: 'Min size (px)' },
 		maxSize: { value: 14, min: 2, max: 32, step: 0.5, label: 'Max size (px)' },
 		displaceRadius: { value: 0.35, min: 0.05, max: 1, step: 0.01, label: 'Cursor radius' },
 		displaceStrength: { value: 0.22, min: 0, max: 0.8, step: 0.01, label: 'Cursor strength' },
 	});
 
+
 	const mouseNDC = useRef(new THREE.Vector2(0, 0));
 	const mouseActive = useRef(0);
 	const { gl, size, camera } = useThree();
 	const stats = useStatsMonitor();
+
+	useRegisterPerfEffect({
+		study: 'dom-canvas-shaders',
+		effect: 'shaders',
+		getCount: () => count,
+		setCount: n => setCount(n),
+		getPointerTarget: () => gl.domElement,
+	});
 
 	const { geometry, material } = useMemo(() => {
 		const seeds = generateCircleDots(count, CIRCLE_RADIUS);
@@ -118,6 +135,7 @@ export default function ShadersPage() {
 			title="Shaders (WebGL)"
 			subtitle="Te same kropki i displacement co DOM/Canvas, ale pozycje i rozmiary liczone równolegle na GPU."
 			activeHref="/comparison/shaders"
+			effect="shaders"
 		>
 			<DemoCanvas orbit={false} lights={false} camera={{ position: [0, 0, 2.5], fov: 50 }}>
 				<color attach="background" args={['#07070a']} />

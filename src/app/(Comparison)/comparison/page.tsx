@@ -27,7 +27,8 @@ export default function ComparisonHubPage() {
 				<h1 className={styles.hubTitle}>Circle dots — DOM vs Canvas vs Shaders</h1>
 				<p className={styles.hubLead}>
 					Ten sam efekt: kropki wypełniające koło (większe bliżej środka) + displacement od kursora.
-					Trzy ścieżki renderu z licznikiem FPS (stats.js) i kontrolką liczby kropek (Leva).
+					Na każdej stronie: <strong>Run suite</strong> odpala ten sam cykl (idle 1s → hover 1s → idle
+					1s) dla listy count i zapisuje FPS do localStorage / CSV.
 				</p>
 				<ul className={styles.hubList}>
 					{VARIANTS.map(v => (

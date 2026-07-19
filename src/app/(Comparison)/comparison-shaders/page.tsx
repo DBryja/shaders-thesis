@@ -21,9 +21,9 @@ export default function ComparisonShadersHubPage() {
 			<div className={styles.hubInner}>
 				<h1 className={styles.hubTitle}>Shader optimization — branching vs branchless</h1>
 				<p className={styles.hubLead}>
-					Bardziej złożony efekt niż proste kropki: radialne fale, pulse, repel i swirl od kursora,
-					modulacja rozmiaru i koloru. Obie wersje muszą wyglądać tak samo — różni się tylko styl GLSL.
-					Pomiar: stats.js + Leva (count i parametry fali).
+					Bardziej złożony efekt niż proste kropki: radialne fale, pulse, repel i swirl od kursora.
+					Obie wersje muszą wyglądać tak samo — różni się tylko styl GLSL. Na każdej stronie:{' '}
+					<strong>Run suite</strong> (idle → hover → idle, te same counts) + Download CSV.
 				</p>
 				<ul className={styles.hubList}>
 					{VARIANTS.map(v => (

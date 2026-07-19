@@ -170,3 +170,146 @@
 	line-height: 1.5;
 	color: #a1a1aa;
 }
+
+.perfBar {
+	position: fixed;
+	left: 4.5rem;
+	right: 1rem;
+	bottom: 0.75rem;
+	z-index: 10001;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.65rem 1rem;
+	padding: 0.55rem 0.75rem;
+	border: 1px solid rgb(255 255 255 / 12%);
+	border-radius: 0.65rem;
+	background: rgb(12 12 18 / 92%);
+	backdrop-filter: blur(10px);
+	color: #e4e4e7;
+	font-size: 0.72rem;
+}
+
+.perfMeta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	min-width: 12rem;
+}
+
+.perfBadge {
+	padding: 0.15rem 0.45rem;
+	border-radius: 999px;
+	background: #e4e4e7;
+	color: #0a0a0a;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.perfHint {
+	color: #a1a1aa;
+}
+
+.perfProgress {
+	color: #93c5fd;
+	font-variant-numeric: tabular-nums;
+}
+
+.perfCount {
+	color: #a1a1aa;
+	font-variant-numeric: tabular-nums;
+}
+
+.perfCounts {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	flex: 1;
+	min-width: 14rem;
+}
+
+.perfCounts span {
+	color: #a1a1aa;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.perfCounts input {
+	flex: 1;
+	min-width: 0;
+	padding: 0.3rem 0.5rem;
+	border: 1px solid rgb(255 255 255 / 14%);
+	border-radius: 0.4rem;
+	background: rgb(0 0 0 / 35%);
+	color: #f4f4f5;
+	font: inherit;
+	font-variant-numeric: tabular-nums;
+}
+
+.perfCounts input:disabled {
+	opacity: 0.55;
+}
+
+.perfActions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.perfBtn,
+.perfBtnGhost,
+.perfBtnDanger {
+	padding: 0.35rem 0.7rem;
+	border-radius: 0.4rem;
+	border: 1px solid transparent;
+	font: inherit;
+	cursor: pointer;
+}
+
+.perfBtn {
+	background: #e4e4e7;
+	color: #0a0a0a;
+	font-weight: 600;
+}
+
+.perfBtn:hover {
+	background: #fff;
+}
+
+.perfBtnGhost {
+	background: transparent;
+	border-color: rgb(255 255 255 / 16%);
+	color: #d4d4d8;
+}
+
+.perfBtnGhost:hover:not(:disabled) {
+	background: rgb(255 255 255 / 6%);
+	color: #fff;
+}
+
+.perfBtnGhost:disabled,
+.perfBtn:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.perfBtnDanger {
+	background: #7f1d1d;
+	color: #fecaca;
+	border-color: #991b1b;
+}
+
+.perfToast {
+	position: absolute;
+	right: 0.75rem;
+	bottom: calc(100% + 0.4rem);
+	padding: 0.35rem 0.6rem;
+	border-radius: 0.4rem;
+	background: #e4e4e7;
+	color: #0a0a0a;
+	font-weight: 500;
+	pointer-events: none;
+}
+

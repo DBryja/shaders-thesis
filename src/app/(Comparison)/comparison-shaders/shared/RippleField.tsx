@@ -2,23 +2,26 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useControls } from 'leva';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 import { generateCircleDots, packPositions } from '../../comparison/shared/generateDots';
+import { type PerfEffect } from '../../comparison/shared/perfResults';
+import { useRegisterPerfEffect } from '../../comparison/shared/PerfTestProvider';
 import { useStatsMonitor } from '../../comparison/shared/useStatsMonitor';
 
 const CIRCLE_RADIUS = 1;
 
 type RippleFieldProps = {
+	effect: PerfEffect;
 	controlsFolder: string;
 	vertexShader: string;
 	fragmentShader: string;
 };
 
-export function RippleField({ controlsFolder, vertexShader, fragmentShader }: RippleFieldProps) {
+export function RippleField({ effect, controlsFolder, vertexShader, fragmentShader }: RippleFieldProps) {
+	const [count, setCount] = useState(40_000);
 	const {
-		count,
 		minSize,
 		maxSize,
 		displaceRadius,
@@ -29,7 +32,13 @@ export function RippleField({ controlsFolder, vertexShader, fragmentShader }: Ri
 		waveAmp,
 		pulseStrength,
 	} = useControls(controlsFolder, {
-		count: { value: 40_000, min: 1000, max: 1_000_000, step: 10_000 },
+		count: {
+			value: 40_000,
+			min: 1000,
+			max: 1_000_000,
+			step: 10_000,
+			onChange: setCount,
+		},
 		minSize: { value: 2, min: 0.5, max: 14, step: 0.5, label: 'Min size (px)' },
 		maxSize: { value: 12, min: 2, max: 28, step: 0.5, label: 'Max size (px)' },
 		displaceRadius: { value: 0.4, min: 0.05, max: 1.2, step: 0.01, label: 'Cursor radius' },
@@ -45,6 +54,14 @@ export function RippleField({ controlsFolder, vertexShader, fragmentShader }: Ri
 	const mouseActive = useRef(0);
 	const { gl, size, camera } = useThree();
 	const stats = useStatsMonitor();
+
+	useRegisterPerfEffect({
+		study: 'shader-optimization',
+		effect,
+		getCount: () => count,
+		setCount: n => setCount(n),
+		getPointerTarget: () => gl.domElement,
+	});
 
 	const { geometry, material } = useMemo(() => {
 		const seeds = generateCircleDots(count, CIRCLE_RADIUS);

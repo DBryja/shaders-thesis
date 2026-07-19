@@ -1,30 +1,47 @@
 'use client';
 
 import { Leva, useControls } from 'leva';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import BodyPortal from '@/components/BodyPortal';
 
 import { ComparisonShell } from '../shared/ComparisonShell';
 import styles from '../shared/comparison.module.css';
 import { cursorDisplacement, dotSize, generateCircleDots } from '../shared/generateDots';
+import { useRegisterPerfEffect } from '../shared/PerfTestProvider';
 import { useStatsMonitor } from '../shared/useStatsMonitor';
 
 const CIRCLE_RADIUS = 1;
 
-export default function CanvasDotsPage() {
-	const { count, minSize, maxSize, displaceRadius, displaceStrength } = useControls('Canvas Dots', {
-		count: { value: 2000, min: 100, max: 50000, step: 100 },
+function CanvasDotsStage() {
+	const [count, setCount] = useState(2000);
+	const { minSize, maxSize, displaceRadius, displaceStrength } = useControls('Canvas Dots', {
+		count: {
+			value: 2000,
+			min: 100,
+			max: 50000,
+			step: 100,
+			onChange: setCount,
+		},
 		minSize: { value: 1.5, min: 0.5, max: 10, step: 0.5, label: 'Min size (px)' },
 		maxSize: { value: 12, min: 2, max: 24, step: 0.5, label: 'Max size (px)' },
 		displaceRadius: { value: 0.35, min: 0.05, max: 1, step: 0.01, label: 'Cursor radius' },
 		displaceStrength: { value: 0.22, min: 0, max: 0.8, step: 0.01, label: 'Cursor strength' },
 	});
 
+
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const mouseRef = useRef({ x: 0, y: 0, active: false });
 	const stats = useStatsMonitor();
 	const seeds = useMemo(() => generateCircleDots(count, CIRCLE_RADIUS), [count]);
+
+	useRegisterPerfEffect({
+		study: 'dom-canvas-shaders',
+		effect: 'canvas',
+		getCount: () => count,
+		setCount: n => setCount(n),
+		getPointerTarget: () => canvasRef.current,
+	});
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -114,17 +131,26 @@ export default function CanvasDotsPage() {
 	}, [seeds, minSize, maxSize, displaceRadius, displaceStrength, stats]);
 
 	return (
-		<ComparisonShell
-			title="Canvas 2D"
-			subtitle="Jedna bitmapa — kropki rysowane przez CanvasRenderingContext2D w pętli rAF."
-			activeHref="/comparison/canvas"
-		>
+		<>
 			<BodyPortal>
 				<div data-leva-root>
 					<Leva collapsed />
 				</div>
 			</BodyPortal>
 			<canvas ref={canvasRef} className={styles.viewport} />
+		</>
+	);
+}
+
+export default function CanvasDotsPage() {
+	return (
+		<ComparisonShell
+			title="Canvas 2D"
+			subtitle="Jedna bitmapa — kropki rysowane przez CanvasRenderingContext2D w pętli rAF."
+			activeHref="/comparison/canvas"
+			effect="canvas"
+		>
+			<CanvasDotsStage />
 		</ComparisonShell>
 	);
 }

@@ -1,30 +1,47 @@
 'use client';
 
 import { Leva, useControls } from 'leva';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import BodyPortal from '@/components/BodyPortal';
 
 import { ComparisonShell } from '../shared/ComparisonShell';
 import styles from '../shared/comparison.module.css';
 import { cursorDisplacement, dotSize, generateCircleDots } from '../shared/generateDots';
+import { useRegisterPerfEffect } from '../shared/PerfTestProvider';
 import { useStatsMonitor } from '../shared/useStatsMonitor';
 
 const CIRCLE_RADIUS = 1;
 
-export default function DomDotsPage() {
-	const { count, minSize, maxSize, displaceRadius, displaceStrength } = useControls('DOM Dots', {
-		count: { value: 800, min: 100, max: 8000, step: 100 },
+function DomDotsStage() {
+	const [count, setCount] = useState(800);
+	const { minSize, maxSize, displaceRadius, displaceStrength } = useControls('DOM Dots', {
+		count: {
+			value: 800,
+			min: 100,
+			max: 8000,
+			step: 100,
+			onChange: setCount,
+		},
 		minSize: { value: 2, min: 1, max: 12, step: 0.5, label: 'Min size (px)' },
 		maxSize: { value: 14, min: 2, max: 28, step: 0.5, label: 'Max size (px)' },
 		displaceRadius: { value: 0.35, min: 0.05, max: 1, step: 0.01, label: 'Cursor radius' },
 		displaceStrength: { value: 0.22, min: 0, max: 0.8, step: 0.01, label: 'Cursor strength' },
 	});
 
+
 	const viewportRef = useRef<HTMLDivElement>(null);
 	const dotsRef = useRef<HTMLDivElement>(null);
 	const mouseRef = useRef({ x: 0, y: 0, active: false });
 	const stats = useStatsMonitor();
+
+	useRegisterPerfEffect({
+		study: 'dom-canvas-shaders',
+		effect: 'dom',
+		getCount: () => count,
+		setCount: n => setCount(n),
+		getPointerTarget: () => viewportRef.current,
+	});
 
 	const seeds = useMemo(() => generateCircleDots(count, CIRCLE_RADIUS), [count]);
 
@@ -98,11 +115,7 @@ export default function DomDotsPage() {
 	}, [seeds, minSize, maxSize, displaceRadius, displaceStrength, stats]);
 
 	return (
-		<ComparisonShell
-			title="DOM — HTML / CSS / JS"
-			subtitle="Każda kropka to osobny element DOM. Pozycje i rozmiary aktualizowane w JS co klatkę."
-			activeHref="/comparison/dom"
-		>
+		<>
 			<BodyPortal>
 				<div data-leva-root>
 					<Leva collapsed />
@@ -135,6 +148,19 @@ export default function DomDotsPage() {
 					))}
 				</div>
 			</div>
+		</>
+	);
+}
+
+export default function DomDotsPage() {
+	return (
+		<ComparisonShell
+			title="DOM — HTML / CSS / JS"
+			subtitle="Każda kropka to osobny element DOM. Pozycje i rozmiary aktualizowane w JS co klatkę."
+			activeHref="/comparison/dom"
+			effect="dom"
+		>
+			<DomDotsStage />
 		</ComparisonShell>
 	);
 }

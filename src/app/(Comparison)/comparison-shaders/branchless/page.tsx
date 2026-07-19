@@ -13,10 +13,16 @@ export default function BranchlessPage() {
 			title="Branchless"
 			subtitle="Te same obliczenia bez rozgałęzień: mix, clamp, smoothstep, inversesqrt — bez discard w fragmencie."
 			activeHref="/comparison-shaders/branchless"
+			effect="branchless"
 		>
 			<DemoCanvas orbit={false} lights={false} camera={{ position: [0, 0, 2.5], fov: 50 }}>
 				<color attach="background" args={['#07070a']} />
-				<RippleField controlsFolder="Branchless" vertexShader={vertexShader} fragmentShader={fragmentShader} />
+				<RippleField
+					effect="branchless"
+					controlsFolder="Branchless"
+					vertexShader={vertexShader}
+					fragmentShader={fragmentShader}
+				/>
 			</DemoCanvas>
 		</ShaderStudyShell>
 	);
